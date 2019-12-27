@@ -30,7 +30,7 @@ io.sockets.on('connect', function(socket){
 
   socket.on('client-msg', function(data){
     console.log('Client Message : %s', data);
-    var response = Recieved Message : ${data};
+    var response = `Recieved Message : ${data}`;
     socket.emit('server-msg', response);
   });
 });
