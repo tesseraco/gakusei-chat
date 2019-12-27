@@ -1,0 +1,24 @@
+{
+  "name": "gakusei-chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tesseraco/gakusei-chat.git"
+  },
+  "author": "Sherin Binu <sherinbinu@hotmail.com> (https://sherondale.me)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tesseraco/gakusei-chat/issues"
+  },
+  "homepage": "https://github.com/tesseraco/gakusei-chat#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "redis": "^2.8.0",
+    "socket.io": "^2.3.0"
+  }
+}
