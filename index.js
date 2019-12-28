@@ -3,34 +3,110 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 
-var connections = [];
+const Room = require('./classes/Room');
+const Message = require('./classes/Message');
+const User = require('./classes/User');
+const generateMessage = require('./functions/generateMessage');
+const isValidMessage = require('./functions/isValidMessage');
+
+const rooms = [];
 
 server.listen(process.env.PORT || 3000);
 
-console.log('Server running...')
 
-app.get('/', function(req,res){
-  res.sendFile(__dirname + "/index.html");
-});
+io.on('connection', function(socket){
 
-app.get('/connect', function(req,res){
-  res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify({ message: 'Hello World' }));
-});
+  socket.on('join', (params, callback) =>{
 
+    try {
+      const { userId, roomId } = params;
 
-io.sockets.on('connect', function(socket){
-  connections.push(socket);
-  console.log('Connected: %s sockets connected', connections.length);
+      //Find whether the room already exists, if not create new
+      let room = rooms.find(room => room.roomId === roomId);
+      if(!room) {
+        room = new Room(roomId);
+        rooms.push(room);
+      }
 
-  socket.on('disconnect', function(data){
-    connections.splice(connections.indexOf(socket), 1);
-    console.log('Disconnected: %s sockets connected', connections.length);
-  });
+      //Find whether the user already is added in the room already, if not add
+      let user = room.users.find(user => user.userId === userId);
+      if(!user) {
+        user = new User('Test User', userId);
+        room.users.push(user);
+      }
 
-  socket.on('client-msg', function(data){
-    console.log('Client Message : %s', data);
-    var response = `Recieved Message : ${data}`;
-    socket.emit('server-msg', response);
+      socket.join(roomId);
+      io.to(roomId).emit('updateUsersList', room.users)
+      socket.emit('alertMessage',`${userId} has joined the chat`);
+      callback();
+      } catch(e) {
+        callback(e);
+      }
+  })
+
+  socket.on('createMessage', (params, callback) => {
+    try {
+      const { userId, roomId, message } = params;
+
+      if(!isValidMessage(message)) return;
+
+      let room = rooms.find(room => room.roomId === roomId);
+      if(!room) {
+        return callback('Room does not exist')
+      }
+
+      let user = room.users.find(user => user.userId === userId);
+      if(!user) {
+        return callback('Given user does not exist in the room')
+      }
+
+      io.to(roomId).emit('newMessage', generateMessage(userId, message));
+    } catch(e) {
+      callback(e);
+    }
+  })
+  
+  socket.on('typing', (params, callback) => {
+    try {
+      const {userId, roomId, status } = params;
+
+      let room = rooms.find(room => room.roomId === roomId);
+      if(!room) {
+        return callback('Room does not exist')
+      }
+
+      let user = room.users.find(user => user.userId === userId);
+      if(!user) {
+        return callback('Given user does not exist in the room')
+      }
+
+      socket.broadcast.to(roomId).emit('updateTypingStatus', {
+        userId,
+        status
+      })
+
+    }
+  })
+
+  socket.on('leave', (params, callback) => {
+    try {
+      const { userId, roomId } = params;
+
+      let room = rooms.find(room => room.roomId === roomId);
+      if(!room) {
+        return callback('Room does not exist')
+      }
+
+      let user = room.users.find(user => user.userId === userId);
+      if(!user) {
+        return callback('Given user does not exist in the room')
+      }
+
+      room.users = rooms.users.filter(user => user.userId !== userId);
+      socket.broadcast.to(roomId),emit('updateUsersList', rooms.users);
+      socket.broadcast.to(roomId).emit('alertMessage', `${userId} has left the chat`);
+    } catch(e) {
+      callback(e);
+    }
   });
 });

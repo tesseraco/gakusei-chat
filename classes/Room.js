@@ -2,9 +2,10 @@ const User = require('./User');
 const Message = require('./Message');
 
 class Room {
-  constructor() {
+  constructor(roomId) {
     this.users = [];
     this.messages = [];
+    this.roomId = roomId;
   }
 
   addUser(userId, userName, userIsAdmin) {
