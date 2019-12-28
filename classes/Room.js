@@ -13,8 +13,8 @@ class Room {
     this.users.push(user);
   } 
 
-  addMessage(senderId, message) {
-    const message = new Message(senderId, message);
+  addMessage(senderId, msg) {
+    const message = new Message(senderId, msg);
     this.messages.push(message);
   }
 }
