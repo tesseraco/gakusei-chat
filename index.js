@@ -47,6 +47,17 @@ io.on('connection', function(socket){
       }
   })
 
+  socket.on('getAllMessages', (roomId) => {
+    try {
+      let room = rooms.find(room => room.roomId === roomId);
+      if(!room) {
+        return socket.emit('applicationError', 'Room does not exist')
+      }
+
+      socket.emit('allMessages', room.messages)
+    }
+  })
+
   socket.on('createMessage', (params) => {
     try {
       const { userId, roomId, message } = params;
@@ -57,6 +68,8 @@ io.on('connection', function(socket){
       if(!room) {
         return socket.emit('applicationError', 'Room does not exist')
       }
+
+      room.messages.push(new Message(userId, message, 'Text'));
 
       let user = room.users.find(user => user.userId === userId);
       if(!user) {
