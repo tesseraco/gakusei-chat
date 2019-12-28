@@ -55,6 +55,8 @@ io.on('connection', function(socket){
       }
 
       socket.emit('allMessages', room.messages)
+    } catch(e) {
+      socket.emit('applicationError', e);
     }
   })
 
