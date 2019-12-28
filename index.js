@@ -11,6 +11,10 @@ const isValidMessage = require('./functions/isValidMessage');
 
 const rooms = [];
 
+app.get('/', (req, res) => {
+  res.send('Welcome to Gakusei Chat');
+})
+
 server.listen(process.env.PORT || 3000);
 
 
