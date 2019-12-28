@@ -85,6 +85,8 @@ io.on('connection', function(socket){
         status
       })
 
+    } catch(e) {
+      callback(e);
     }
   })
 
