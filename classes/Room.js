@@ -1,7 +1,7 @@
 const User = require('./User');
 const Message = require('./Message');
 
-class Room {
+module.exports = class Room {
   constructor(roomId) {
     this.users = [];
     this.messages = [];
